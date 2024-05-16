@@ -51,6 +51,6 @@ df["Months Remaining"] = round(((df["Expires"] - start_date).dt.days / 30.4375),
 df = df.dropna()
 
 
-# Outputting the cleansed data to csv for checking
+# Outputting the cleansed data to csv for checking.
 df.to_csv("data/output.csv")
 
