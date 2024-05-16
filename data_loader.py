@@ -1,36 +1,25 @@
 import pandas as pd
 import numpy as np
 import datetime as dt
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error
-import matplotlib.pyplot as plt
 
-
-file = "prem player export.rtf"
-
-start_date = dt.datetime.strptime('2023-09-01', "%Y-%m-%d")
-
-
+file = "data/Export 10K players.rtf"
 df = pd.read_csv(file, delimiter="|")
+
 df = df.rename(columns=str.strip) #stripping column names
 df.dropna(subset=["Height"], inplace=True)
 df.drop(columns=['Unnamed: 0'], inplace=True)
 
-# Strip spaces, and convert wage to a number
+# Strip spaces, and convert wage to a float
 df["Wage"] = df["Wage"].str.strip()
 df["Wage"] = df["Wage"].str.replace("£", "", regex=True)
 df["Wage"] = df["Wage"].str.replace(",", "", regex=True)
 df["Wage"] = df["Wage"].str.replace(" p/w", "", regex=True)
 df["Wage"] = df["Wage"].astype(float)
 
-# Splitting out the min and max est transfer value
+# Handling the string for transfer value and creating an average float value between min and max estimate.
 df[["Min Value", "Max Value"]] = df["Transfer Value"].str.split(" - ", expand=True)
-
-# Removing unwanted characters
 df["Min Value"] = df["Min Value"].str.strip().str.replace("£", "")
 df["Min Value"] = df["Min Value"].replace("Not for Sale", np.nan)
-
 df["Max Value"] = df["Max Value"].str.strip().str.replace("£", "")
 
 def convert_values(value):
@@ -45,7 +34,6 @@ def convert_values(value):
     
 df["Min Value"] = df["Min Value"].apply(convert_values)
 df["Max Value"] = df["Max Value"].apply(convert_values)
-
 df["Avg Value"] = (df["Min Value"] + df["Max Value"]) / 2
 
 # Converting the height data into cm
@@ -54,39 +42,15 @@ df["height_cm"] = (((df["height_feet"] * 12) + (df["height_inch"])) * 2.54).asty
 
 
 # Converting the contract expiry date into years remaining
+start_date = dt.datetime.strptime('2023-09-01', "%Y-%m-%d")
 df["Expires"] = pd.to_datetime(df["Expires"], dayfirst=True)
-df["Months Remaining"] = df["Expires"] - start_date
+df["Months Remaining"] = round(((df["Expires"] - start_date).dt.days / 30.4375),0)
 
-# Outputting the cleansed data to csv
-df.to_csv("output.csv")
 
+# Drop any rows will nulls.
 df = df.dropna()
 
 
-
-# Creating the x and y sets for the model
-features = df[["Age",  "Pac"]]
-
-""""1v1", "Acc", "Aer", "Agg", "Agi", "Ant", "Bal", "Bra", "Cmd", "Cnt", "Cmp", "Cro",
-               "Dec", "Det", "Dri", "Fin", "Fir", "Fla", "Han", "Hea", "Jum", "Kic", "Ldr", "Lon", "Mar",
-               "OtB", "Pac", "Pas", "Pos", "Ref", "Sta", "Str", "Tck", "Tea", "Tec", "Thr", "TRO", "Vis",
-               "Wor", "Cor"""
-
-target = df["Avg Value"]
-
-
-# Create the testing and training data
-X_train, X_test, y_train, y_test = train_test_split(features, target, test_size=0.2, random_state=42)
-
-# Create and train the model
-model = LinearRegression()
-model.fit(X_train, y_train)
-
-y_pred = model.predict(X_test)
-mse = mean_squared_error(y_test, y_pred)
-print("MSE: ", mse)
-
-
-
-
+# Outputting the cleansed data to csv for checking
+df.to_csv("data/output.csv")
 
