@@ -7,6 +7,7 @@ This project is a simple study using linear regression to analyse what influence
 
 ## Technologies
 
+- Jupyter Notebook
 - Python
   - pandas
   - numpy
