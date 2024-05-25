@@ -1,6 +1,6 @@
 # Football Manager 2024 Player Transfer Valuation Analysis
 
-# Project Status: ONGOING
+# Project Status: COMPLETE
 
 ## Introduction
 This project models player value within Football Manager 2024, based on a number of features, including all of their attributes, as well as other features such as the league they play in and their age.
